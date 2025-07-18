@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ session.get('csrf_token', '') }}">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3ab714;
+            --secondary: #78cc20;
+            --dark: #1a3c34;
+            --text-secondary: #6b7280;
+            --gradient-1: linear-gradient(90deg, #3ab714 0%, #78cc20 100%);
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: #f5f7fa;
+            color: var(--dark);
+        }
+
+        .view {
+            min-height: 100vh;
+            padding-bottom: 80px;
+            box-sizing: border-box;
+            padding-top: 60px; /* Match header height to prevent overlap */
+        }
+
+        .header {
+            background: white;
+            padding: 10px 15px;
+            box-shadow: var(--shadow-sm);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            height: 60px; /* Define height for consistency */
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .logo-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--dark);
+            cursor: pointer;
+            padding: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            color: var(--primary);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-icon {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+
+        .flash-messages {
+            margin: 15px;
+        }
+
+        .flash-message {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .flash-message.success {
+            background: #e6f4e1;
+            color: var(--primary);
+        }
+
+        .flash-message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        input:focus, textarea:focus, button:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(58, 183, 20, 0.2);
+        }
+    </style>
+</head>
+<body>
+    {% block content %}{% endblock %}
+    
+    {% if view != 'login' %}
+    <nav class="bottom-nav">
+        <a href="{{ url_for('index') }}" class="nav-item {% if view == 'home' %}active{% endif %}">
+            <i class="fas fa-home nav-icon"></i>
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('detection') }}" class="nav-item {% if view == 'detection' %}active{% endif %}">
+            <i class="fas fa-leaf nav-icon"></i>
+            <span>Detection</span>
+        </a>
+        <a href="{{ url_for('forum') }}" class="nav-item {% if view == 'forum' %}active{% endif %}">
+            <i class="fas fa-users nav-icon"></i>
+            <span>Forum</span>
+        </a>
+        <a href="{{ url_for('chatbot') }}" class="nav-item {% if view == 'chatbot' %}active{% endif %}">
+            <i class="fas fa-robot nav-icon"></i>
+            <span>Chat</span>
+        </a>
+        <a href="{{ url_for('logout') }}" class="nav-item">
+            <i class="fas fa-sign-out-alt nav-icon"></i>
+            <span>Logout</span>
+        </a>
+    </nav>
+    {% endif %}
+    
+    {% for message in get_flashed_messages(with_categories=True) %}
+        <div class="flash-message {{ message[0] }}" style="padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.9rem;">
+            {{ message[1] }}
+        </div>
+    {% endfor %}
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

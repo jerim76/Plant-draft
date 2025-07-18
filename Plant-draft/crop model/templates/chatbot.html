@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Plant Assistant{% endblock %}
+
+{% block content %}
+<div id="chatbot-view" class="view">
+    <div class="header">
+        <div class="header-content">
+            <a href="{{ url_for('index') }}" class="nav-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="logo-text">Plant Assistant</div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="nav-btn">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </div>
+    
+    <div class="chat-container" style="display: flex; flex-direction: column; height: calc(100vh - 130px);">
+        <div class="chat-messages" id="chat-messages" style="flex: 1; overflow-y: auto; padding: 20px 15px;">
+            {% for message in messages|default([]) %}
+                <div class="message {% if message.is_user %}user{% endif %}" style="display: flex; margin-bottom: 20px; max-width: 85%;{% if message.is_user %}margin-left: auto; flex-direction: row-reverse;{% endif %}">
+                    <img src="https://images.unsplash.com/photo-{{ '1507003211169-0a1dd7228f2d' if message.is_user else '1552058544-f2b08422138a' }}?auto=format&fit=crop&w=600&q=80" alt="{{ 'User' if message.is_user else 'AI Assistant' }}" class="message-avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin: 0 10px; flex-shrink: 0;">
+                    <div class="message-content" style="background: white; border-radius: 18px; padding: 15px; box-shadow: var(--shadow-sm);{% if message.is_user %}background: var(--gradient-1); color: white;{% endif %}">
+                        <div class="message-sender" style="font-size: 0.8rem; font-weight: 600; margin-bottom: 5px; color: var(--text-secondary);{% if message.is_user %}color: white;{% endif %}">{{ 'You' if message.is_user else 'Plant Health AI' }}</div>
+                        <div>{{ message.content }}</div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="chat-input-container" style="padding: 15px; background: white; border-top: 1px solid #eee; display: flex; gap: 10px;">
+            <input type="text" class="chat-input" id="chat-input" placeholder="Type your message..." style="flex: 1; padding: 12px 20px; border-radius: 30px; border: 2px solid #eee; font-size: 1rem;">
+            <button class="send-btn" id="send-btn" style="width: 50px; height: 50px; border-radius: 50%; background: var(--gradient-1); color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-sm);">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('Chatbot view script loaded');
+        
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const chatMessages = document.getElementById('chat-messages');
+
+        if (!chatInput || !sendBtn || !chatMessages) {
+            console.error('Chat elements not found:', {
+                chatInput: !!chatInput,
+                sendBtn: !!sendBtn,
+                chatMessages: !!chatMessages
+            });
+            return;
+        }
+
+        console.log('Binding send button and input events');
+        sendBtn.addEventListener('click', () => {
+            console.log('Send button clicked');
+            if (chatInput.value.trim() !== '') {
+                sendMessage(chatInput.value);
+                chatInput.value = '';
+            } else {
+                console.log('Empty message, not sending');
+            }
+        });
+
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && chatInput.value.trim() !== '') {
+                console.log('Enter key pressed in chat input');
+                sendMessage(chatInput.value);
+                chatInput.value = '';
+            }
+        });
+
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        function sendMessage(message) {
+            console.log('Sending message:', message);
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.style.cssText = 'display: flex; margin-bottom: 20px; max-width: 85%; margin-left: auto; flex-direction: row-reverse;';
+            userMessage.innerHTML = `
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80" alt="User" class="message-avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin: 0 10px; flex-shrink: 0;">
+                <div class="message-content" style="background: var(--gradient-1); color: white; border-radius: 18px; padding: 15px; box-shadow: var(--shadow-sm);">
+                    <div class="message-sender" style="font-size: 0.8rem; font-weight: 600; margin-bottom: 5px; color: white;">You</div>
+                    <div>${message}</div>
+                </div>
+            `;
+            chatMessages.appendChild(userMessage);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            fetch('/chatbot', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRF-Token': '{{ session.get('csrf_token', '') }}'
+                },
+                body: `message=${encodeURIComponent(message)}`
+            })
+            .then(response => {
+                console.log(`Chatbot response status: ${response.status}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Chatbot response data:', data);
+                if (data.success) {
+                    const aiMessage = document.createElement('div');
+                    aiMessage.className = 'message';
+                    aiMessage.style.cssText = 'display: flex; margin-bottom: 20px; max-width: 85%;';
+                    aiMessage.innerHTML = `
+                        <img src="https://images.unsplash.com/photo-1552058544-f2b08422138a?auto=format&fit=crop&w=600&q=80" alt="AI Assistant" class="message-avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin: 0 10px; flex-shrink: 0;">
+                        <div class="message-content" style="background: white; border-radius: 18px; padding: 15px; box-shadow: var(--shadow-sm);">
+                            <div class="message-sender" style="font-size: 0.8rem; font-weight: 600; margin-bottom: 5px; color: var(--text-secondary);">Plant Health AI</div>
+                            <div>${data.ai_response}</div>
+                        </div>
+                    `;
+                    chatMessages.appendChild(aiMessage);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                } else {
+                    console.error('Chatbot error:', data.error);
+                    alert(data.error || 'Error processing message');
+                }
+            })
+            .catch(error => {
+                console.error('Chat error:', error);
+                alert(`Error sending message: ${error.message}`);
+            });
+        }
+    });
+</script>
+{% endblock %}

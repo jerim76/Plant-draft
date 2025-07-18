@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div id="home-view" class="view">
+    <div class="header">
+        <div class="header-content">
+            <button class="nav-btn" id="menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <div class="logo-text">Dashboard</div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="nav-btn">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+        <div id="dropdown-menu" style="display: none; position: absolute; top: 60px; left: 10px; background: white; border-radius: 8px; box-shadow: var(--shadow-md); padding: 10px; z-index: 100;">
+            <a href="{{ url_for('index') }}" style="display: block; padding: 10px; color: var(--dark); font-weight: 600;">Home</a>
+            <a href="{{ url_for('detection') }}" style="display: block; padding: 10px; color: var(--dark); font-weight: 600;">Detection</a>
+            <a href="{{ url_for('forum') }}" style="display: block; padding: 10px; color: var(--dark); font-weight: 600;">Forum</a>
+            <a href="{{ url_for('chatbot') }}" style="display: block; padding: 10px; color: var(--dark); font-weight: 600;">Chat</a>
+            <a href="{{ url_for('logout') }}" style="display: block; padding: 10px; color: var(--dark); font-weight: 600;">Logout</a>
+        </div>
+    </div>
+    
+    <div class="profile-section" style="display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(255, 255, 255, 0.7); margin: 15px; border-radius: 16px; box-shadow: var(--shadow-sm);">
+        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80" alt="Profile" class="profile-avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: var(--shadow-sm);">
+        <div>
+            <div class="profile-name" style="font-size: 1.3rem; font-weight: 700; color: var(--dark);">{{ user.name if user else 'User' }}</div>
+            <div class="profile-contact" style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 5px;">{{ user.email if user else 'No email' }}</div>
+        </div>
+    </div>
+    
+    <div class="section-title" style="color: var(--dark); font-size: 1.4rem; font-weight: 800; padding: 20px 15px 10px; position: relative;">
+        Farm Overview
+        <span style="content: ''; display: inline-block; width: 6px; height: 24px; background: var(--primary); border-radius: 3px; margin-right: 12px;"></span>
+    </div>
+    
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 0 15px;">
+        <div class="stat-card" style="background: white; border-radius: 16px; padding: 15px; box-shadow: var(--shadow-sm); text-align: center;">
+            <div class="stat-icon" style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;">
+                <i class="fas fa-leaf"></i>
+            </div>
+            <div class="stat-value" style="font-size: 1.6rem; font-weight: 800; color: var(--primary); margin-bottom: 5px;">12</div>
+            <div class="stat-label" style="font-size: 0.9rem; color: var(--text-secondary);">Healthy Crops</div>
+        </div>
+        <div class="stat-card" style="background: white; border-radius: 16px; padding: 15px; box-shadow: var(--shadow-sm); text-align: center;">
+            <div class="stat-icon" style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;">
+                <i class="fas fa-bug"></i>
+            </div>
+            <div class="stat-value" style="font-size: 1.6rem; font-weight: 800; color: var(--primary); margin-bottom: 5px;">3</div>
+            <div class="stat-label" style="font-size: 0.9rem; color: var(--text-secondary);">Disease Cases</div>
+        </div>
+    </div>
+    
+    <div class="section-title" style="color: var(--dark); font-size: 1.4rem; font-weight: 800; padding: 20px 15px 10px; position: relative;">
+        Registered Crops
+        <span style="content: ''; display: inline-block; width: 6px; height: 24px; background: var(--primary); border-radius: 3px; margin-right: 12px;"></span>
+    </div>
+    
+    <div class="crops-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 0 15px 20px;">
+        <div class="crop-card" style="background: white; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm); text-align: center;">
+            <img src="https://images.unsplash.com/photo-1590779033100-9f60a05a013d?auto=format&fit=crop&w=600&q=80" alt="Tomato" class="crop-image" style="width: 100%; aspect-ratio: 1/1; object-fit: cover;">
+            <div class="crop-name" style="padding: 10px; font-weight: 600;">Tomato</div>
+        </div>
+        <div class="crop-card" style="background: white; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm); text-align: center;">
+            <img src="https://images.unsplash.com/photo-1557844352-761f2565b576?auto=format&fit=crop&w=600&q=80" alt="Maize" class="crop-image" style="width: 100%; aspect-ratio: 1/1; object-fit: cover;">
+            <div class="crop-name" style="padding: 10px; font-weight: 600;">Maize</div>
+        </div>
+        <div class="crop-card" style="background: white; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm); text-align: center;">
+            <img src="https://images.unsplash.com/photo-1566400048889-1f0c1e45df98?auto=format&fit=crop&w=600&q=80" alt="Beans" class="crop-image" style="width: 100%; aspect-ratio: 1/1; object-fit: cover;">
+            <div class="crop-name" style="padding: 10px; font-weight: 600;">Beans</div>
+        </div>
+    </div>
+    
+    <div class="section-title" style="color: var(--dark); font-size: 1.4rem; font-weight: 800; padding: 20px 15px 10px; position: relative;">
+        Recent Alerts
+        <span style="content: ''; display: inline-block; width: 6px; height: 24px; background: var(--primary); border-radius: 3px; margin-right: 12px;"></span>
+    </div>
+    
+    <div class="forum-card" style="background: white; border-radius: 16px; overflow: hidden; margin: 0 15px 15px; box-shadow: var(--shadow-sm); padding: 20px; border-left: 4px solid var(--primary);">
+        <div class="forum-header" style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+            <img src="https://images.unsplash.com/photo-1552058544-f2b08422138a?auto=format&fit=crop&w=600&q=80" alt="User" class="forum-avatar" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid white; box-shadow: var(--shadow-sm);">
+            <div>
+                <div class="forum-user" style="font-weight: 700; color: var(--dark);">System Alert</div>
+                <div class="forum-time" style="color: var(--text-secondary); font-size: 0.8rem;">Today at 10:30 AM</div>
+            </div>
+        </div>
+        <div class="forum-title" style="font-size: 1.2rem; font-weight: 700; color: var(--dark); margin-bottom: 10px;">Tomato Early Blight Detected</div>
+        <div class="forum-content" style="color: var(--text-secondary); margin-bottom: 15px;">Potential disease detected in your tomato crops. Immediate action recommended.</div>
+        <div class="forum-meta" style="display: flex; align-items: center; color: var(--text-secondary); font-size: 0.9rem;">
+            <div style="margin-right: 20px; display: flex; align-items: center;"><i class="fas fa-exclamation-circle" style="margin-right: 5px; color: var(--primary);"></i> High Priority</div>
+        </div>
+    </div>
+    
+    <button class="new-topic-btn" id="new-topic-btn" style="position: fixed; bottom: 80px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: var(--gradient-1); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: var(--shadow-md); z-index: 10; border: none; cursor: pointer;">
+        <i class="fas fa-plus"></i>
+    </button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('Home view script loaded');
+        
+        const menuBtn = document.getElementById('menu-btn');
+        const dropdownMenu = document.getElementById('dropdown-menu');
+        const newTopicBtn = document.getElementById('new-topic-btn');
+
+        if (!menuBtn || !dropdownMenu || !newTopicBtn) {
+            console.error('Home elements not found:', {
+                menuBtn: !!menuBtn,
+                dropdownMenu: !!dropdownMenu,
+                newTopicBtn: !!newTopicBtn
+            });
+            return;
+        }
+
+        console.log('Binding menu button event');
+        menuBtn.addEventListener('click', () => {
+            console.log('Menu button clicked');
+            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+        });
+
+        console.log('Binding new topic button event');
+        newTopicBtn.addEventListener('click', () => {
+            console.log('New topic button clicked');
+            window.location.href = '{{ url_for('forum') }}';
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!menuBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                console.log('Closing dropdown menu');
+                dropdownMenu.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

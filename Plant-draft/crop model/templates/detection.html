@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Disease Detection{% endblock %}
+
+{% block content %}
+<div id="detection-view" class="view">
+    <div class="header">
+        <div class="header-content">
+            <a href="{{ url_for('index') }}" class="nav-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <div class="logo-text">Disease Detection</div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="nav-btn">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </div>
+    
+    <div class="upload-section" style="padding: 20px 15px; text-align: center;">
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--dark); margin-bottom: 20px;">Upload Plant Image</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 30px;">Select an image to detect potential diseases</p>
+        
+        <div class="upload-container" style="margin-bottom: 20px;">
+            <input type="file" id="image-upload" accept="image/*" style="display: none;">
+            <button type="button" class="upload-btn" id="upload-btn" style="width: 100%; max-width: 300px; padding: 15px; background: var(--gradient-1); color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: var(--shadow-sm);">
+                Select Image
+            </button>
+        </div>
+        
+        <div id="image-preview" style="display: none; margin-bottom: 20px;">
+            <img id="preview-img" src="#" alt="Preview" style="max-width: 100%; max-height: 300px; border-radius: 12px; box-shadow: var(--shadow-sm);">
+        </div>
+        
+        <div id="result-section" style="display: none;">
+            <div class="result-card">
+                <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--dark); margin-bottom: 15px; display: flex; align-items: center;">
+                    <i class="fas fa-diagnoses" style="margin-right: 10px; color: var(--primary);"></i> Analysis Result
+                </h3>
+                <div class="result-details">
+                    <div class="detail-card">
+                        <h4><i class="fas fa-info-circle" style="color: var(--primary);"></i> Prediction</h4>
+                        <p id="prediction-result-prediction" style="margin: 5px 0;"></p>
+                    </div>
+                    <div class="detail-card">
+                        <h4><i class="fas fa-chart-line" style="color: var(--primary);"></i> Confidence</h4>
+                        <p id="prediction-result-confidence" style="margin: 5px 0;"></p>
+                    </div>
+                    <div class="detail-card">
+                        <h4><i class="fas fa-book" style="color: var(--primary);"></i> Description</h4>
+                        <div id="prediction-result-description" style="margin: 5px 0;"></div>
+                    </div>
+                    <div class="detail-card">
+                        <h4><i class="fas fa-virus" style="color: var(--primary);"></i> Causes</h4>
+                        <div id="prediction-result-causes" style="margin: 5px 0;"></div>
+                    </div>
+                    <div class="detail-card">
+                        <h4><i class="fas fa-stethoscope" style="color: var(--primary);"></i> Symptoms</h4>
+                        <div id="prediction-result-symptoms" style="margin: 5px 0;"></div>
+                    </div>
+                    <div class="detail-card">
+                        <h4><i class="fas fa-tools" style="color: var(--primary);"></i> Immediate Actions</h4>
+                        <div id="prediction-result-immediate-actions" style="margin: 5px 0;"></div>
+                    </div>
+                    <div class="detail-card">
+                        <h4><i class="fas fa-leaf" style="color: var(--primary);"></i> Organic Treatments</h4>
+                        <div id="prediction-result-organic-treatments" style="margin: 5px 0;"></div>
+                    </div>
+                    <div class="detail-card">
+                        <h4><i class="fas fa-flask" style="color: var(--primary);"></i> Chemical Treatments</h4>
+                        <div id="prediction-result-chemical-treatments" style="margin: 5px 0;"></div>
+                    </div>
+                    <div class="detail-card">
+                        <h4><i class="fas fa-shield-alt" style="color: var(--primary);"></i> Prevention Tips</h4>
+                        <div id="prediction-result-prevention-tips" style="margin: 5px 0;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    #result-section {
+        background: white;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: var(--shadow-sm);
+        margin: 0 15px 20px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .result-card {
+        background: #f9fafb;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .detail-card {
+        background: white;
+        border-left: 4px solid var(--primary);
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .detail-card h4 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 5px;
+    }
+
+    .detail-card div {
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+
+    /* Remove default list styling if OpenAI uses <ul> or <ol> */
+    .detail-card ul, .detail-card ol {
+        list-style-type: none;
+        padding-left: 0;
+        margin: 0;
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('Detection view script loaded');
+        
+        const uploadBtn = document.getElementById('upload-btn');
+        const imageUpload = document.getElementById('image-upload');
+        const imagePreview = document.getElementById('image-preview');
+        const previewImg = document.getElementById('preview-img');
+        const resultSection = document.getElementById('result-section');
+        const predictionResultPrediction = document.getElementById('prediction-result-prediction');
+        const predictionResultConfidence = document.getElementById('prediction-result-confidence');
+        const predictionResultDescription = document.getElementById('prediction-result-description');
+        const predictionResultCauses = document.getElementById('prediction-result-causes');
+        const predictionResultSymptoms = document.getElementById('prediction-result-symptoms');
+        const predictionResultImmediateActions = document.getElementById('prediction-result-immediate-actions');
+        const predictionResultOrganicTreatments = document.getElementById('prediction-result-organic-treatments');
+        const predictionResultChemicalTreatments = document.getElementById('prediction-result-chemical-treatments');
+        const predictionResultPreventionTips = document.getElementById('prediction-result-prevention-tips');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+        if (!uploadBtn || !imageUpload || !imagePreview || !previewImg || !resultSection || !predictionResultPrediction || !predictionResultConfidence || !predictionResultDescription || !predictionResultCauses || !predictionResultSymptoms || !predictionResultImmediateActions || !predictionResultOrganicTreatments || !predictionResultChemicalTreatments || !predictionResultPreventionTips || !csrfToken) {
+            console.error('Detection elements not found:', {
+                uploadBtn: !!uploadBtn,
+                imageUpload: !!imageUpload,
+                imagePreview: !!imagePreview,
+                previewImg: !!previewImg,
+                resultSection: !!resultSection,
+                predictionResultPrediction: !!predictionResultPrediction,
+                predictionResultConfidence: !!predictionResultConfidence,
+                predictionResultDescription: !!predictionResultDescription,
+                predictionResultCauses: !!predictionResultCauses,
+                predictionResultSymptoms: !!predictionResultSymptoms,
+                predictionResultImmediateActions: !!predictionResultImmediateActions,
+                predictionResultOrganicTreatments: !!predictionResultOrganicTreatments,
+                predictionResultChemicalTreatments: !!predictionResultChemicalTreatments,
+                predictionResultPreventionTips: !!predictionResultPreventionTips,
+                csrfToken: !!csrfToken
+            });
+            return;
+        }
+
+        console.log('Binding upload button event');
+        uploadBtn.addEventListener('click', () => {
+            console.log('Upload button clicked');
+            imageUpload.click();
+        });
+
+        console.log('Binding image upload change event');
+        imageUpload.addEventListener('change', () => {
+            console.log('Image selected');
+            if (imageUpload.files && imageUpload.files[0]) {
+                const file = imageUpload.files[0];
+                console.log('Selected file:', file.name);
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    console.log('Image loaded for preview');
+                    previewImg.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+
+                const formData = new FormData();
+                formData.append('file', file);
+                console.log('Sending image to /predict with CSRF token:', csrfToken);
+                fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-Token': csrfToken
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    console.log(`Predict response status: ${response.status}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Prediction response:', data);
+                    if (data.success) {
+                        resultSection.style.display = 'block';
+                        predictionResultPrediction.textContent = data.prediction;
+                        predictionResultConfidence.textContent = `${(data.confidence * 100).toFixed(2)}%`;
+                        predictionResultDescription.innerHTML = data.details.description;
+                        predictionResultCauses.innerHTML = data.details.causes;
+                        predictionResultSymptoms.innerHTML = data.details.symptoms;
+                        predictionResultImmediateActions.innerHTML = data.details.immediate_actions;
+                        predictionResultOrganicTreatments.innerHTML = data.details.organic_treatments;
+                        predictionResultChemicalTreatments.innerHTML = data.details.chemical_treatments;
+                        predictionResultPreventionTips.innerHTML = data.details.prevention_tips;
+                    } else {
+                        console.error('Prediction failed:', data.error);
+                        alert(data.error || 'Error analyzing image');
+                    }
+                })
+                .catch(error => {
+                    console.error('Prediction error:', error);
+                    alert(`Error uploading image: ${error.message}`);
+                });
+            } else {
+                console.log('No file selected');
+            }
+        });
+    });
+</script>
+{% endblock %}

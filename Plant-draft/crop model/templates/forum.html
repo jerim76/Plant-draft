@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Forum{% endblock %}
+
+{% block content %}
+<div id="forum-view" class="view">
+    <div class="header">
+        <div class="header-content">
+            <a href="{{ url_for('index') }}" class="nav-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="logo-text">Forum</div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="nav-btn">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </div>
+    
+    <div class="forum-section" style="padding: 20px 15px;">
+        <!-- Search Bar -->
+        <input type="text" id="search-bar" placeholder="Search posts..." style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #d1d5db; border-radius: 8px;">
+
+        <!-- Filter Buttons -->
+        <div style="margin-bottom: 15px;">
+            <button class="filter-btn" data-category="All" style="padding: 8px 15px; margin-right: 10px; border: 1px solid #d1d5db; border-radius: 8px; background: #f3f4f6; cursor: pointer;">All</button>
+            <button class="filter-btn" data-category="Market" style="padding: 8px 15px; margin-right: 10px; border: 1px solid #d1d5db; border-radius: 8px; background: #f3f4f6; cursor: pointer;">Market</button>
+            <button class="filter-btn" data-category="Prices" style="padding: 8px 15px; margin-right: 10px; border: 1px solid #d1d5db; border-radius: 8px; background: #f3f4f6; cursor: pointer;">Prices</button>
+            <button class="filter-btn" data-category="Tips" style="padding: 8px 15px; margin-right: 10px; border: 1px solid #d1d5db; border-radius: 8px; background: #f3f4f6; cursor: pointer;">Tips</button>
+            <button class="filter-btn" data-category="Events" style="padding: 8px 15px; border: 1px solid #d1d5db; border-radius: 8px; background: #f3f4f6; cursor: pointer;">Events</button>
+        </div>
+
+        <div id="post-form" style="display: none; margin-top: 20px;">
+            <form method="POST" enctype="multipart/form-data" id="new-post-form">
+                <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}">
+                <input type="text" name="title" placeholder="Title" style="width: 100%; margin-bottom: 10px; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px;">
+                <textarea name="content" placeholder="Content" style="width: 100%; height: 100px; margin-bottom: 10px; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; resize: vertical;"></textarea>
+                <input type="text" name="tags" placeholder="Tags (comma-separated)" style="width: 100%; margin-bottom: 10px; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px;">
+                <input type="text" name="location" placeholder="Location (e.g., Nairobi)" style="width: 100%; margin-bottom: 10px; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px;">
+                <select name="category" style="width: 100%; margin-bottom: 10px; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px;">
+                    <option value="All">All</option>
+                    <option value="Market">Market</option>
+                    <option value="Prices">Prices</option>
+                    <option value="Tips">Tips</option>
+                    <option value="Events">Events</option>
+                </select>
+                <input type="file" name="file" accept="image/*" style="margin-bottom: 10px;">
+                <button type="submit" style="width: 100%; padding: 10px; background: var(--gradient-1); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer;">Post</button>
+            </form>
+        </div>
+
+        <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--dark); margin-top: 20px;">Recent Posts</h3>
+        {% for post in posts %}
+        <div class="post-card" data-category="{{ post.category or 'All' }}" style="background: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 40px; height: 40px; background: #ccc; border-radius: 50%; margin-right: 10px;"></div> <!-- Placeholder avatar -->
+                <div>
+                    <p><strong>{{ post.user.name }}</strong></p>
+                    <p style="font-size: 0.9rem; color: #666;">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
+            </div>
+            <h4>{{ post.title }}</h4>
+            <p>{{ post.content }}</p>
+            <p>Tags: {{ post.tags or 'None' }}</p>
+            <p>Category: {{ post.category or 'All' }}</p>
+        </div>
+        {% endfor %}
+        {% for community_post in community_posts %}
+        <div class="post-card" data-category="{{ community_post.category or 'All' }}" style="background: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 40px; height: 40px; background: #ccc; border-radius: 50%; margin-right: 10px;"></div> <!-- Placeholder avatar -->
+                <div>
+                    <p><strong>{{ community_post.user.name }}</strong></p>
+                    <p style="font-size: 0.9rem; color: #666;">{{ community_post.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
+            </div>
+            <p>{{ community_post.content }}</p>
+            {% if community_post.image_path %}
+            <img src="{{ url_for('static', filename=community_post.image_path) }}" style="max-width: 100%; border-radius: 8px; margin-top: 10px;">
+            {% endif %}
+            <p>Location: {{ community_post.location or 'Not specified' }}</p>
+            <p>Category: {{ community_post.category or 'All' }}</p>
+            {% for response in community_post.responses %}
+            <div style="background: #e6f4e1; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                    <div style="width: 30px; height: 30px; background: #ddd; border-radius: 50%; margin-right: 5px;"></div> <!-- Placeholder avatar -->
+                    <div>
+                        <p><strong>{{ response.response_author.name }}</strong></p>
+                        <p style="font-size: 0.8rem; color: #666;">{{ response.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                    </div>
+                </div>
+                <p>{{ response.content }}</p>
+            </div>
+            {% endfor %}
+            <form method="POST" action="{{ url_for('forum_response', post_id=community_post.id) }}" style="margin-top: 10px;">
+                <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}">
+                <textarea name="response" placeholder="Add a response..." style="width: 100%; height: 60px; margin-bottom: 5px; padding: 5px; border: 1px solid #d1d5db; border-radius: 8px;"></textarea>
+                <button type="submit" style="width: 100%; padding: 5px; background: var(--gradient-1); color: white; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">Respond</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Floating Action Button -->
+    <button id="toggle-form" class="fab" style="position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #4CAF50, #2E7D32); color: white; border: none; box-shadow: 0 4px 8px rgba(0,0,0,0.3); font-size: 1.5rem; cursor: pointer; z-index: 1000;">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <script>
+        document.getElementById('toggle-form').addEventListener('click', function() {
+            const form = document.getElementById('post-form');
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        });
+
+        document.getElementById('new-post-form').addEventListener('submit', function(event) {
+            setTimeout(() => {
+                document.getElementById('post-form').style.display = 'none';
+            }, 100);
+        });
+
+        // Search functionality
+        document.getElementById('search-bar').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            document.querySelectorAll('.post-card').forEach(post => {
+                const text = post.textContent.toLowerCase();
+                post.style.display = text.includes(searchTerm) ? 'block' : 'none';
+            });
+        });
+
+        // Filter functionality
+        document.querySelectorAll('.filter-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const category = this.getAttribute('data-category');
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.style.background = '#f3f4f6');
+                this.style.background = '#4CAF50';
+                document.querySelectorAll('.post-card').forEach(post => {
+                    const postCategory = post.getAttribute('data-category');
+                    post.style.display = (category === 'All' || postCategory === category) ? 'block' : 'none';
+                });
+            });
+        });
+
+        // Set default filter to 'All'
+        document.querySelector('[data-category="All"]').click();
+    </script>
+</div>
+{% endblock %}

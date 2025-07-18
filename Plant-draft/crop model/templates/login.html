@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div id="login-view" class="view" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; padding: 20px;">
+    <div class="logo-container" style="display: flex; align-items: center; gap: 10px; margin-bottom: 30px;">
+        <div class="logo-icon" style="font-size: 2rem; color: var(--primary);">
+            <i class="fas fa-leaf"></i>
+        </div>
+        <div class="logo-text" style="font-size: 1.5rem; font-weight: 700; color: var(--dark);">AgriHealth</div>
+    </div>
+    
+    <div class="auth-container" style="background: white; border-radius: 16px; padding: 30px; box-shadow: var(--shadow-md); width: 100%; max-width: 400px;">
+        <div class="auth-tabs" style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <button class="auth-tab active" id="login-tab" style="flex: 1; padding: 10px; background: none; border: none; font-size: 1.1rem; font-weight: 700; color: var(--primary); border-bottom: 2px solid var(--primary); cursor: pointer;">Login</button>
+            <button class="auth-tab" id="register-tab" style="flex: 1; padding: 10px; background: none; border: none; font-size: 1.1rem; font-weight: 700; color: var(--text-secondary); cursor: pointer;">Register</button>
+        </div>
+        
+        <div id="login-form" class="auth-form">
+            <form action="{{ url_for('login') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}">
+                <div class="input-group" style="margin-bottom: 20px;">
+                    <label for="email" style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark);">Email</label>
+                    <input type="email" id="email" name="email" class="input-field" placeholder="Enter your email" required style="width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #e1e8e7; font-size: 1rem; transition: all 0.3s ease;">
+                </div>
+                <div class="input-group" style="margin-bottom: 20px;">
+                    <label for="password" style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark);">Password</label>
+                    <input type="password" id="password" name="password" class="input-field" placeholder="Enter your password" required style="width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #e1e8e7; font-size: 1rem; transition: all 0.3s ease;">
+                </div>
+                <button type="submit" class="login-btn" style="width: 100%; padding: 15px; background: var(--gradient-1); color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: var(--shadow-sm);">Sign In</button>
+            </form>
+            <div style="text-align: center; margin-top: 15px;">
+                <a href="#" id="show-register" style="color: var(--primary); font-size: 0.9rem;">Don't have an account? Register</a>
+            </div>
+        </div>
+        
+        <div id="register-form" class="auth-form" style="display: none;">
+            <form action="{{ url_for('register') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}">
+                <div class="input-group" style="margin-bottom: 20px;">
+                    <label for="reg-name" style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark);">Name</label>
+                    <input type="text" id="reg-name" name="name" class="input-field" placeholder="Enter your name" required style="width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #e1e8e7; font-size: 1rem; transition: all 0.3s ease;">
+                </div>
+                <div class="input-group" style="margin-bottom: 20px;">
+                    <label for="reg-email" style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark);">Email</label>
+                    <input type="email" id="reg-email" name="email" class="input-field" placeholder="Enter your email" required style="width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #e1e8e7; font-size: 1rem; transition: all 0.3s ease;">
+                </div>
+                <div class="input-group" style="margin-bottom: 20px;">
+                    <label for="reg-password" style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark);">Password</label>
+                    <input type="password" id="reg-password" name="password" class="input-field" placeholder="Enter your password" required style="width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #e1e8e7; font-size: 1rem; transition: all 0.3s ease;">
+                </div>
+                <button type="submit" class="login-btn" style="width: 100%; padding: 15px; background: var(--gradient-1); color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: var(--shadow-sm);">Register</button>
+            </form>
+            <div style="text-align: center; margin-top: 15px;">
+                <a href="#" id="show-login" style="color: var(--primary); font-size: 0.9rem;">Already have an account? Login</a>
+            </div>
+        </div>
+    </div>
+    
+    {% for message in get_flashed_messages(with_categories=True) %}
+        <div class="flash-message {{ message[0] }}" style="padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.9rem; width: 100%; max-width: 400px;">
+            {{ message[1] }}
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('Login view script loaded');
+        
+        const loginTab = document.getElementById('login-tab');
+        const registerTab = document.getElementById('register-tab');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const showRegister = document.getElementById('show-register');
+        const showLogin = document.getElementById('show-login');
+
+        if (!loginTab || !registerTab || !loginForm || !registerForm || !showRegister || !showLogin) {
+            console.error('Login elements not found:', {
+                loginTab: !!loginTab,
+                registerTab: !!registerTab,
+                loginForm: !!loginForm,
+                registerForm: !!registerForm,
+                showRegister: !!showRegister,
+                showLogin: !!showLogin
+            });
+            return;
+        }
+
+        console.log('Binding login/register tab events');
+        loginTab.addEventListener('click', () => {
+            console.log('Login tab clicked');
+            loginTab.classList.add('active');
+            registerTab.classList.remove('active');
+            loginForm.style.display = 'block';
+            registerForm.style.display = 'none';
+        });
+
+        registerTab.addEventListener('click', () => {
+            console.log('Register tab clicked');
+            registerTab.classList.add('active');
+            loginTab.classList.remove('active');
+            registerForm.style.display = 'block';
+            loginForm.style.display = 'none';
+        });
+
+        showRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Show register clicked');
+            registerTab.click();
+        });
+
+        showLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Show login clicked');
+            loginTab.click();
+        });
+    });
+</script>
+{% endblock %}
